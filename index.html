@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html>
+<!-- Program exported to HTML using the KA Project Exporter by @MushyAvocado 
+https://www.khanacademy.org/computer-programming/ka-project-exporter/5195486791385088
+-->
+	
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<title>Slide</title>
+	<style>
+		
+		
+		/* Change the color as you want */
+		:root {
+			--background-color: #000000;
+		}
+		
+		
+		html, body, #wrapper {
+			overflow: hidden;
+			width: 100%;
+		    height: 100%;
+			margin: 0px;
+			padding: 0px;
+		    width: calc(100% + 1px);
+		}
+		
+		body {
+		    background-color: var(--background-color);
+		}
+		
+		
+		canvas {
+			width: fit-content;
+			height: fit-content;
+		}
+		
+		canvas:focus {
+			outline: none;
+		}
+		
+		/* Automatically fits to the remaining height and centers the canvas it contains */
+		#wrapper {
+			padding: 0px;
+			margin: 0px;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			width: 100%;
+		}
+		
+</style>
+</head>
+<body id="wrapper">
+    <!-- Canvases with a class of "sketch" are applied to the program in the order importPJS() is called. -->
+    <canvas class="sketch"></canvas>
+	<!-- Load the PJS library -->
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/Khan/processing-js@master/processing.js"></script>
+	<!-- The exporter script must be loaded before the program script -->
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/Mushy-Avocado/KA-exporter@main/exporter.js"></script>
+	<!-- Run Khan Academy program and import PJS -->
+	<script type="application/javascript">
+		
+		
+		function program() {
+		    
+		    title("Slide");
+		    size(600, 600);
+		    
+		    // All code goes here
+			var keys = {};
+			var click = false;
+			var scene = 'load';
+			
+			var fonts = [
+			    createFont('Tahoma'),
+			    createFont('Tahoma Bold'),
+			];
+			textAlign(CENTER,CENTER);
+			
+			size(600,600,1);
+			
+			var Level;
+			var level = 0;
+			
+			var blocks = [];
+			
+			var txts = [
+			    'A beginning of sorts',
+			    'An obstacle',
+			    'Labyrinth',
+			    'A little more complex',
+			    'Harder',
+			    'Figure it out,\nAlexander',
+			    'Lava is hot',
+			    'Cruelty',
+			    'Stepping up',
+			    'The missing block',
+			    'Harder than it looks',
+			    'Easier than it looks',
+			    'Getting closer',
+			    'Not that hard',
+			    'Share',
+			    'A Larger Level',
+			    'With great size\ncomes great responsibility',
+			    'Down which aisle?',
+			    'A tale of two portals',
+			    'Empty Space',
+			];
+			
+			var new_ = (function() {
+			    var obj = Object.create(this.prototype);
+			    this.apply(obj, arguments);
+			    return obj;
+			});
+			
+			var math = (function(){
+			    Math.rectRect = function(x1,y1,w1,h1,x2,y2,w2,h2){
+			        return(x1 + w1 > x2 && y1 + h1 > y2 && x1 < x2 + w2 && y1 < y2 + h2);    
+			    };
+			    Math.mouseCirc = function(x,y,d){
+			        return(dist(mouseX,mouseY,x,y) <= d/2);
+			    };
+			})();
+			
+			var imgs = (function(){
+			    return({
+			        arrow:{
+			            w:15,
+			            h:15,
+			            d:function(){
+			                strokeJoin(ROUND);
+			                fill(255);
+			                strokeWeight(2);
+			                stroke(255);
+			                beginShape();
+			                vertex(2,2);
+			                vertex(5,12);
+			                vertex(6,6);
+			                vertex(12,5);
+			                endShape(CLOSE);
+			                
+			                noStroke();
+			                ellipse(11,11,4,4);  
+			            },
+			        },
+			        pointer:{
+			            w:13,
+			            h:13,
+			            d:function(){
+			                stroke(255);
+			                strokeWeight(2);
+			                line(4,2,4,6);
+			                line(7,4,7,6);
+			                line(10,5,10,6);
+			                line(1,7,4,12);
+			                noStroke();
+			                fill(255);
+			                rect(3,6,8,7,0,0,3,3);  
+			            },
+			        },  
+			        wall:{
+			            w:50,
+			            h:50,
+			            d:function(){
+			                strokeWeight(1);
+			                for(var i = 0; i < 100; i ++){
+			                    var clr = map(i,-50,50,240,180);
+			                    stroke(clr,clr,clr+10);
+			                    line(i,0,i-50,50);
+			                }
+			                stroke(255,5);
+			                fill(255,3);
+			                for(var i = 0; i < 20; i ++){
+			                    ellipse(random(0,50),random(0,50),20,20);   
+			                }
+			
+			            }
+			        },
+			        block:{
+			            w:50,
+			            h:50,
+			            d:function(){
+			                background(50,50,60);
+			                strokeWeight(1);
+			                for(var i = 0; i < 100; i ++){
+			                    stroke(0,map(i,0,100,0,40));
+			                    line(i,0,i-50,50);
+			                }
+			            }
+			        },
+			        lava:{
+			            w:50,
+			            h:50,
+			            d:function(){
+			                strokeWeight(1);
+			                for(var i = 0; i < 100; i ++){
+			                    stroke(map(i,-50,50,240,180),50,70);
+			                    line(i,0,i-50,50);
+			                }
+			                stroke(255,5);
+			                fill(255,3);
+			                for(var i = 0; i < 20; i ++){
+			                    ellipse(random(0,50),random(0,50),20,20);   
+			                }
+			            }
+			        },
+			        portal:{
+			            w:50,
+			            h:50,
+			            d:function(){
+			                strokeWeight(1);
+			                for(var i = 0; i < 100; i ++){
+			                    stroke(0,map(i,0,100,0,50));
+			                    line(i,0,i-50,50);
+			                }
+			                stroke(255,5);
+			                fill(255,3);
+			                for(var i = 0; i < 20; i ++){
+			                    ellipse(random(0,50),random(0,50),20,20);   
+			                }
+			            },
+			        },
+			        backdrop:{
+			            w:600,
+			            h:600,
+			            d:function(){
+			                background(50,50,60);
+			                for(var i = 0; i < 600; i += 50){
+			                    for(var j = 0; j < 600; j += 50){
+			                        image(imgs.block,i,j);   
+			                    }
+			                }
+			            },
+			        },
+			        player:{
+			            w:50,
+			            h:50,
+			            d:function(){
+			                fill(245,245,255);
+			                rect(0,0,50,50);
+			                fill(50,50,60);
+			                rect(0,10,50,4,5);
+			                arc(40,14,20,20,0,180);
+			                arc(20,14,20,20,0,180);
+			                rect(25,30,10,4,5);
+			            },  
+			        },
+			        title:{
+			            w:600,
+			            h:600,
+			            d:function(){
+			                var txt = [
+			                    '-aaaa-a---aaa-aaa--aaaa-',
+			                    '-a----a----a--a--a-a---',
+			                    '-aaaa-a----a--a--a-aaa--',
+			                    '----a-a----a--a--a-a---',
+			                    '-aaaa-aaa-aaa-aaa--aaaa-',
+			                ];
+			                for(var i = 0; i < txt.length; i ++){
+			                    for(var j = 0; j < txt[i].length; j ++){
+			                        switch(txt[i][j]){
+			                            case 'a':
+			                                image(imgs.wall,j*25,i*25,25,25);
+			                            break;
+			                        }
+			                    }
+			                }
+			            },
+			        },
+			        how:{
+			            w:600,
+			            h:600,
+			            d:function(){
+			                var txt = [
+			                    '----a--a--aaa--a---a----',
+			                    '----a--a-a---a-a---a----',
+			                    '----aaaa-a---a-a---a----',
+			                    '----a--a-a---a-a-a-a----',
+			                    '----a--a--aaa---a-a-----',
+			                ];
+			                for(var i = 0; i < txt.length; i ++){
+			                    for(var j = 0; j < txt[i].length; j ++){
+			                        switch(txt[i][j]){
+			                            case 'a':
+			                                image(imgs.wall,j*25,i*25,25,25);
+			                            break;
+			                        }
+			                    }
+			                }
+			            },
+			        },
+			        credit:{
+			            w:600,
+			            h:600,
+			            d:function(){
+			                var txt = [
+			                    '-aa-aaa--aaaa-aaa--a-aaa',
+			                    'a---a--a-a- --a--a-a--a-',
+			                    'a---a--a-aaa--a--a-a--a-',
+			                    'a---aaa--a- --a--a-a--a-',
+			                    '-aa-a--a-aaaa-aaa--a--a-',
+			                ];
+			                for(var i = 0; i < txt.length; i ++){
+			                    for(var j = 0; j < txt[i].length; j ++){
+			                        switch(txt[i][j]){
+			                            case 'a':
+			                                image(imgs.wall,j*25,i*25,25,25);
+			                            break;
+			                        }
+			                    }
+			                }
+			            },
+			        },
+			        win:{
+			            w:600,
+			            h:600,
+			            d:function(){
+			                var txt = [
+			                    '-----a---a-aaa-a--a-----',
+			                    '-----a---a--a--aa-a-----',
+			                    '-----a---a--a--a-aa-----',
+			                    '-----a-a-a--a--a--a-----',
+			                    '------a-a--aaa-a--a-----',
+			                ];
+			                for(var i = 0; i < txt.length; i ++){
+			                    for(var j = 0; j < txt[i].length; j ++){
+			                        switch(txt[i][j]){
+			                            case 'a':
+			                                image(imgs.wall,j*25,i*25,25,25);
+			                            break;
+			                        }
+			                    }
+			                }
+			            },
+			        },
+			    });
+			})();
+			
+			var Mouse = (function(){
+			    var m = function(){
+			        this.x = 0;
+			        this.y = 0;
+			        this.size = 8;
+			        this.type = 'arrow';
+			    };
+			    m.prototype.update = function(){
+			        this.x = mouseX;
+			        this.y = mouseY;
+			    };
+			    m.prototype.set = function(type){
+			        this.type = type;
+			    };
+			    m.prototype.display = function(){
+			        cursor('none');
+			        fill(255, 0, 0);
+			        noStroke();
+			        if(mouseIsPressed){
+			            
+			            this.size = lerp(this.size,12,0.2);
+			        }
+			        else{
+			            this.size = lerp(this.size,15,0.2);
+			        }
+			        image(imgs[this.type],mouseX,mouseY,this.size,this.size);
+			    };  
+			    return(new_.call(m));
+			})();
+			
+			var Camera = (function(){
+			    var cam = function(){
+			        this.x = 0;
+			        this.y = 0;
+			        this.lerpSpeed = 0.08;
+			        this.scale = 1;
+			    };
+			    cam.prototype.startLink = function(){
+			        pushMatrix();
+			    };
+			    cam.prototype.endLink = function(){
+			        popMatrix();
+			    };
+			    cam.prototype.follow = function(obj){
+			        
+			        this.x = lerp(this.x,-obj.x+width/2-obj.w/2,this.lerpSpeed) + map(mouseX,0,600,10,-10);
+			        this.y = lerp(this.y,-obj.y+height/2 - obj.h/2,this.lerpSpeed) + map(mouseY,0,600,10,-10);
+			        
+			        
+			        translate(~~this.x,~~this.y);
+			        
+			        translate(obj.x,obj.y);
+			        scale(this.scale);
+			        translate(-obj.x,-obj.y);
+			    };
+			    cam.prototype.setScale = function(scl){
+			        this.scale = lerp(this.scale,scl,this.lerpSpeed);
+			        
+			    };
+			    
+			    return (new_.call(cam));
+			})();
+			
+			var Trans = (function(){
+			    var t = function(){
+			        this.x = -600;
+			        this.y = 0;
+			        
+			        this.state = 1;
+			        
+			        this.to = null;
+			        this.txt = 'something';
+			        this.running = false;
+			        
+			        this.done = true;
+			        
+			        this.lerpSpeed = 0.1;
+			    };
+			    t.prototype.start = function(to,txt){
+			        this.running = true;
+			        this.done = false;
+			        this.to = to;
+			        this.txt = txt || '';
+			        this.state = 1;
+			        this.y = 0;
+			        
+			        if(this.to === 'play'){
+			            this.txt = txts[level];   
+			        }
+			    };
+			    t.prototype.end = function(){
+			        this.running = false;
+			        this.state = 1;
+			        this.txt = '';
+			        
+			        this.y = 0;
+			    };
+			    t.prototype.run = function(){
+			        if(this.running){
+			            noStroke();
+			            fill(245,245,255);
+			            rect(0,0,600,this.y);
+			            
+			            fill(50,50,60);
+			            textFont(fonts[0],40);
+			            text(this.txt,300,this.y-300);
+			            
+			            if(this.state === 1){
+			                this.t = 601;
+			                if(this.txt !== ''){
+			                    this.t = 600.01;   
+			                }
+			                this.y = lerp(this.y,this.t,this.lerpSpeed);
+			                if(this.y >= 600){
+			                    this.state = 2;  
+			                    this.x = -600;
+			                    scene = this.to;
+			                    if(this.to === 'play'){
+			                        Level();   
+			                    }
+			                }
+			            }
+			            if(this.state === 2){
+			                this.y = lerp(this.y,-1,this.lerpSpeed);
+			                if(this.y <= 0){
+			                    this.state = 3;  
+			                    this.done = true;
+			                }
+			            }
+			            if(this.state === 3){
+			                this.x = lerp(this.x,1,0.05);
+			                if(this.x >= 0 || scene === 'play'){
+			                    this.x = 0;
+			                    this.end();
+			                }   
+			            }
+			        }
+			    };
+			    
+			    return(new_.call(t));
+			})();
+			
+			var Player = (function(){
+			    var p = function(){
+			        this.x = 0;
+			        this.y = 0;
+			        
+			        this.w = 50;
+			        this.h = 50;
+			        
+			        this.xv = 0;
+			        this.yv = 0;
+			        
+			        this.acc = 0.4;
+			        this.maxVel = 3;    
+			    
+			        
+			        this.moving = false;
+			        this.dir = '';
+			        
+			        this.start = {
+			            x:0,
+			            y:0,
+			        };
+			        
+			        this.scale = 1;
+			        this.facing = 1;
+			    };
+			    p.prototype.display = function(){
+			        pushMatrix();
+			        translate(this.x+this.w/2,this.y);
+			        scale(this.facing,1);
+			        translate(-this.w/2,0);
+			        image(imgs.player,0,0);
+			        popMatrix();
+			    };
+			    p.prototype.move = function(){
+			        this.px = this.x;
+			        this.py = this.y;
+			        
+			        if(!this.moving){
+			            if(keys[LEFT]){
+			                this.moving = true;
+			                this.dir = 'left';
+			                this.facing = -1;
+			            }
+			            if(keys[RIGHT]){
+			                this.moving = true;
+			                this.dir = 'right';
+			                this.facing = 1;
+			            }
+			            if(keys[UP]){
+			                this.moving = true;
+			                this.dir = 'up';
+			            }
+			            if(keys[DOWN]){
+			                this.moving = true;
+			                this.dir = 'down';
+			            }
+			            this.scale = lerp(this.scale,0.8,0.1);
+			        }
+			        else if(this.moving){
+			            switch(this.dir){
+			                case 'left':
+			                    this.xv -= this.acc;
+			                break;
+			                case 'right':
+			                    this.xv += this.acc;
+			                break;
+			                case 'up':
+			                    this.yv -= this.acc;
+			                break;
+			                case 'down':
+			                    this.yv += this.acc;
+			                break;
+			            }
+			            this.scale = lerp(this.scale,1,0.1);
+			        }
+			        
+			        this.xv = constrain(this.xv,-this.velMax,this.velMax);
+			        this.yv = constrain(this.yv,-this.velMax,this.velMax);
+			        this.x += this.xv;
+			        this.y += this.yv;
+			        
+			        
+			    };
+			    p.prototype.checkColl = function(obj){
+			        return(Math.rectRect(this.x,this.y,this.w,this.h,obj.x,obj.y,obj.w,obj.h));  
+			    };
+			    p.prototype.collide = function(obj){
+			        if(this.checkColl(obj)){
+			            if(this.py + this.h <= obj.y) {
+			                this.y = obj.y - this.h;    
+			            }
+			            else if(this.px >= obj.x + obj.w) {
+			                this.x = obj.x+obj.w;
+			            }
+			            else if(this.px  <= obj.x- this.w) {
+			                this.x = obj.x-this.w;
+			            }
+			            else if(this.py >= obj.y + obj.h){
+			                this.y = obj.y+obj.h;
+			            }  
+			            this.moving = false;
+			            
+			            this.xv = 0;
+			            this.yv = 0;
+			        }        
+			    };
+			    return(new_.call(p));
+			})();
+			
+			var Wall = (function(){
+			    var w = function(config){
+			        this.x = config.x;
+			        this.y = config.y;
+			        
+			        this.w = 50;
+			        this.h = 50;
+			    };
+			    w.prototype.display = function(){
+			        image(imgs.wall,this.x,this.y,this.w,this.h);
+			    };
+			    w.prototype.collide = function(){
+			        Player.collide(this);
+			    };
+			    return w;
+			})();
+			
+			var Portal = (function(){
+			    var p = function(config){
+			        this.x = config.x;
+			        this.y = config.y;
+			        
+			        this.w = 50;
+			        this.h = 50;
+			    };
+			    p.prototype.display = function(){
+			        colorMode(HSB);
+			        fill((frameCount/2)%255,255,255);
+			        rect(this.x,this.y,this.w,this.h);
+			        image(imgs.portal,this.x,this.y,this.w,this.h);
+			        colorMode(RGB);
+			    };
+			    p.prototype.collide = function(){
+			        if(Player.checkColl(this) && !Trans.running){
+			            if(level >= 19){
+			                Trans.start('win');   
+			            }
+			            else{
+			                level ++;
+			                Trans.start('play');
+			            }
+			        }
+			    };
+			    return p;
+			})();
+			
+			var Lava = (function(){
+			    var l = function(config){
+			        this.x = config.x;
+			        this.y = config.y;
+			        
+			        this.w = 50;
+			        this.h = 50;
+			    };
+			    l.prototype.display = function(){
+			        image(imgs.lava,this.x,this.y,this.w,this.h);
+			    };
+			    l.prototype.collide = function(){
+			        if(Player.checkColl(this)){
+			            Player.x = Player.start.x;
+			            Player.y = Player.start.y;
+			            Player.xv = 0;
+			            Player.yv = 0;
+			            Player.moving = false;
+			            keys = {};
+			            Level();
+			        }
+			    };
+			    return l;
+			})();
+			
+			var Level = (function(){
+			    var levels = [
+			        [
+			            'bbbbbbbbbbbb',
+			            'b----------b',
+			            'b----------b',
+			            'b----------b',
+			            'b----------b',
+			            'b----------b',
+			            'b----------b',
+			            'b----------b',
+			            'b----------b',
+			            'b----------b',
+			            'bP--------@b',
+			            'bbbbbbbbbbbb',
+			        ],
+			        [
+			            'bbbbbbbbbbbb',
+			            'b--------b@b',
+			            'b--------b-b',
+			            'b--------b-b',
+			            'b----------b',
+			            'b----------b',
+			            'b----------b',
+			            'b----------b',
+			            'b----------b',
+			            'b----------b',
+			            'bP---------b',
+			            'bbbbbbbbbbbb',
+			        ],
+			        [
+			            'bbbbbbbbbbbb',
+			            'bPb---b---@b',
+			            'b-b-b-b-b--b',
+			            'b-b-b-b-b--b',
+			            'b-b-b-b-b--b',
+			            'b-b-b-b-b--b',
+			            'b-b-b-b-b--b',
+			            'b-b-b-b-b--b',
+			            'b-b-b-b-b--b',
+			            'b-b-b-b-b--b',
+			            'b---b---b--b',
+			            'bbbbbbbbbbbb',
+			        ],
+			        [    
+			            'bbbbbbbbbbbb',
+			            'b---------@b',
+			            'b----------b',
+			            'b----------b',
+			            'b----------b',
+			            'b-----b---bb',
+			            'b----------b',
+			            'b----------b',
+			            'b----------b',
+			            'bb---------b',
+			            'bP-----b---b',
+			            'bbbbbbbbbbbb',
+			        ],
+			        [
+			            'bbbbbbbbbbbb',
+			            'b---------bb',
+			            'bb---------b',
+			            'b-------b--b',
+			            'b--b-------b',
+			            'b----------b',
+			            'b-----@----b',
+			            'b---b------b',
+			            'b--------b-b',
+			            'b-b--------b',
+			            'bP---------b',
+			            'bbbbbbbbbbbb',
+			        ],
+			        [
+			            'bbbbbbbbbbbb',
+			            'b---b-----@b',
+			            'b-----bbbbbb',
+			            'b-b----b---b',
+			            'b----b-----b',
+			            'b----------b',
+			            'b--b-------b',
+			            'b---b---b--b',
+			            'bb------b--b',
+			            'b---P-b----b',
+			            'b----------b',
+			            'bbbbbbbbbbbb',  
+			        ],
+			        [
+			            'bbbbbbbbbbbb',
+			            'bPl------l@b',
+			            'b-l------l-b',
+			            'b-l------l-b',
+			            'b-l------l-b',
+			            'b-l------l-b',
+			            'b-l------l-b',
+			            'b-l------l-b',
+			            'b-l------l-b',
+			            'b-l------l-b',
+			            'b----------b',
+			            'bbbbbbbbbbbb',
+			        ],
+			        [
+			            'bbbbbbbbbbbb',
+			            'bbb----bbllb',
+			            'bb--bb--bllb',
+			            'bP-bbbb--bbb',
+			            'bbbbbbbb--bb',
+			            'b----bbb--lb',
+			            'b--b--b--bbb',
+			            'bb--b---b-@b',
+			            'bbb--bbb---b',
+			            'bbbb-----bbb',
+			            'bbbbb--bbbbb',
+			            'bbbbbbbbbbbb',
+			        ],
+			        [
+			            'bbbbbbbbbbbb',
+			            'b----b-----b',
+			            'b-b---l-b--b',
+			            'b----b----bb',
+			            'b-l-------lb',
+			            'b----P----lb',
+			            'b------b--lb',
+			            'bl-b-b----bb',
+			            'bb---------b',
+			            'b--------b-b',
+			            'b--l--bllb@b',
+			            'bbbbbbbbbbbb',
+			        ],
+			        [
+			            'bbbbbbbbbbbb',
+			            'b---------bb',
+			            'b----bb----b',
+			            'b---b------b',
+			            'b------bb--b',
+			            'b-----bll--b',
+			            'b--bb------b',
+			            'b---b-l----b',
+			            'b----------b',
+			            'b---b----bbb',
+			            'bP--b@----lb',
+			            'bbbbbbbbbbbb',
+			        ],
+			        [
+			            'bbbbbbbbbbbb',
+			            'bl-------blb',
+			            'b---b--b-@-b',
+			            'b---b-P----b',
+			            'b-b-------bb',
+			            'b--b-l--b--b',
+			            'b---bbbb---b',
+			            'b--b---b---b',
+			            'b-b--l-b--bb',
+			            'b---b------b',
+			            'b---b---b--b',
+			            'bbbbbbbbbbbb',
+			        ],
+			        [
+			            'bbbbbbbbbbbb',
+			            'bb---------b',
+			            'b---------bb',
+			            'b---l-l----b',
+			            'b----b-l---b',
+			            'b-b------l-b',
+			            'b--l-------b',
+			            'b---b-lb---b',
+			            'b--l----l--b',
+			            'b----l-----b',
+			            'bP-------b@b',
+			            'bbbbbbbbbbbb',
+			        ],
+			        [
+			            'bbbbbbbbbbbb',
+			            'b--b------bb',
+			            'b-------b--b',
+			            'b--------b-b',
+			            'bb---------b',
+			            'b-----b----b',
+			            'b---------bb',
+			            'b---b-----lb',
+			            'b---b---l-bb',
+			            'bb---bb-l--b',
+			            'bP------b-@b',
+			            'bbbbbbbbbbbb',
+			        ],
+			        [
+			            'bbbbbbbbbbbb',
+			            'b----l-----b',
+			            'b------b---b',
+			            'b-----b----b',
+			            'b-l-lb-----b',
+			            'b-------l--b',
+			            'bb-b--l----b',
+			            'b---------bb',
+			            'bb---------b',
+			            'b-----b--b-b',
+			            'bPb----llb@b',
+			            'bbbbbbbbbbbb',
+			        ],
+			        [
+			            'bbbbbbbbbbbb',
+			            'b------b---b',
+			            'b---b--b---b',
+			            'b------b-b-b',
+			            'b--bl------b',
+			            'b-----b---lb',
+			            'b---l------b',
+			            'b----b--b--b',
+			            'b--b-------b',
+			            'b----b-----b',
+			            'bP------l-@b',
+			            'bbbbbbbbbbbb',
+			        ],
+			        [
+			            'bbbbbbbbbbbbbbbbbbbbbbbbbbb',
+			            'b@------------------------b',
+			            'b-------------------------b',
+			            'b-------------------------b',
+			            'b-------------------------b',
+			            'b-------------------------b',
+			            'b-------------------------b',
+			            'b-------------------------b',
+			            'b-------------------------b',
+			            'b-------------------------b',
+			            'b-------------------------b',
+			            'b-------------------------b',
+			            'bP-----------------------lb',
+			            'bbbbbbbbbbbbbbbbbbbbbbbbbbb',
+			        ],
+			        [
+			            'bbbbbbbbbbbbbbbbbbbbbbbbbbb',
+			            'b---b-----------------b---b',
+			            'b------------b----b-------b',
+			            'bb--b----b----------b-----b',
+			            'b--------------b----------b',
+			            'b------b-----------------bb',
+			            'b-b--------b--b-------b---b',
+			            'b-------b--------------b--b',
+			            'b---b----------b----------b',
+			            'b------b---b--------b-----b',
+			            'b--b------b---b---b-------b',
+			            'b----b------b----------b-bb',
+			            'bP-----b------------b--b-@b',
+			            'bbbbbbbbbbbbbbbbbbbbbbbbbbb',
+			        ],
+			        [
+			            'bbbbbbbbbbbbbbbbbbbbbbbbbbb',
+			            'bb-----------------------lb',
+			            'b--b---------------------lb',
+			            'b----bbbbbbbbbbbbbbbbbbbbbb',
+			            'b--b---------------------bb',
+			            'b------------------------bb',
+			            'bb------bbbbbbbbbbbbbbbbbbb',
+			            'b-----bb-----------------@b',
+			            'b------------------------lb',
+			            'b-b---bbbbbbbbbbbbbbbbbbbbb',
+			            'b------------------------@b',
+			            'bP--b--------------------lb',
+			            'bbbbbbbbbbbbbbbbbbbbbbbbbbb',
+			        ],
+			        [
+			            'bbbbbbbbbbbbbbbbbbbbbbbbbbb',
+			            'bb-------------b----------b',
+			            'b-----b------l------b-----b',
+			            'b---------b---b-----------b',
+			            'b---b----------b----------b',
+			            'b-----l----b----------b---b',
+			            'b---b---b---------b-------b',
+			            'b----b-------l---b--------b',
+			            'b--------------------b----b',
+			            'b--@------------------b---b',
+			            'b-----@----b-----b-------lb',
+			            'b------------l------------b',
+			            'bP----b---b---------b-----b',
+			            'bbbbbbbbbbbbbbbbbbbbbbbbbbb',
+			        ],
+			        [
+			            'bbbbbbbbbbbbbbbbbbbbbbbbbbb',
+			            'b@----------b-------------b',
+			            'bbb-----------------------b',
+			            'b-------------------------b',
+			            'b------b----------b-------b',
+			            'b-------------------------b',
+			            'b-----------P-------------b',
+			            'b-------------------------b',
+			            'b-------------------------b',
+			            'b--b----------------b-----b',
+			            'b-------------b-----------b',
+			            'b----------@--------------b',
+			            'b------------------------lb',
+			            'bbbbbbbbbbbbbbbbbbbbbbbbbbb',
+			        ],
+			    ];
+			    return(function(){
+			        blocks = [];
+			        var l = levels[level];
+			        for(var i = 0; i < l.length; i ++){
+			            for(var j = 0; j < l[i].length; j ++){
+			                switch(l[i][j]){
+			                    case 'b':
+			                        blocks.push(new_.call(Wall,{
+			                            x:j*50,
+			                            y:i*50
+			                        }));
+			                    break;
+			                    case 'P':
+			                        Player.x = j*50;
+			                        Player.y = i*50;
+			                        Player.start.x = j*50;
+			                        Player.start.y = i*50;
+			                    break;
+			                    case 'l':
+			                        blocks.push(new_.call(Lava,{
+			                            x:j*50,
+			                            y:i*50,
+			                        }));
+			                    break;
+			                    case '@':
+			                        blocks.push(new_.call(Portal,{
+			                            x:j*50,
+			                            y:i*50,
+			                        }));
+			                    break;
+			                }
+			            }
+			        }
+			    });
+			})();
+			
+			var Buttons = (function(){
+			    var b = function(config){
+			        this.x = config.x;
+			        this.y = config.y;
+			        
+			        this.d = config.d;
+			        this.d2 = 0;
+			        
+			        this.txt = config.txt;
+			        this.to = config.to;
+			        
+			        this.lerpSpeed = 0.1;
+			        
+			    };
+			    b.prototype.display = function(){
+			        noFill();
+			        stroke(245,245,255);
+			        strokeWeight(this.d/20);
+			        ellipse(this.x,this.y-Trans.x,this.d,this.d);
+			        
+			        fill(245,245,255);
+			        textFont(fonts[1],this.d/5);
+			        text(this.txt,this.x,this.y-Trans.x);
+			        
+			        fill(245,245,255,30);
+			        noStroke();
+			        ellipse(this.x,this.y-Trans.x,this.d2,this.d2);
+			    };
+			    b.prototype.update = function(){
+			        if(Math.mouseCirc(this.x,this.y-Trans.x,this.d)){
+			            Mouse.set('pointer');
+			            
+			            this.d2 = lerp(this.d2,this.d,this.lerpSpeed);
+			            
+			            if(click){
+			                Trans.start(this.to);
+			            }
+			        }   
+			        else{
+			            this.d2 = lerp(this.d2,0,this.lerpSpeed);   
+			        }
+			    };
+			    b.prototype.run = function(){
+			        this.update();
+			        this.display();
+			    };
+			    return({
+			        play:new_.call(b,{
+			            x:300,
+			            y:425,
+			            d:150,
+			            txt:'Play',
+			            to:'play',
+			        }),
+			        how:new_.call(b,{
+			            x:125,
+			            y:425,
+			            d:125,
+			            txt:'How',
+			            to:'how',
+			        }),
+			        credit:new_.call(b,{
+			            x:475,
+			            y:425,
+			            d:125,
+			            txt:'Credit',
+			            to:'credit',
+			        }),
+			        home:new_.call(b,{
+			            x:50,
+			            y:550,
+			            d:75,
+			            txt:'Home',
+			            to:'menu',
+			        }),
+			    }); 
+			})();
+			
+			var Scene = (function(){
+			    
+			    var curLoad = 0;
+			    
+			    keyPressed = function(){
+			        keys[keyCode] = true;
+			        
+			    };
+			    keyReleased = function(){
+			        keys[keyCode] = false;
+			    };
+			    
+			    mouseClicked = function(){
+			        click = true;  
+			    };
+			    
+			    //{
+			    //{
+			    noStroke();
+			    for(var i = -200; i  < 400; i +=0.3){
+			            fill(0, 34+i*2, 255);
+			            rect(100,i+60,400,1);
+			    }
+			    var Pic = get(0, 0, 400, 400);
+			    //{
+			    background(255, 0);
+			    
+			    stroke(0);
+			    
+			    
+			    
+			    var masking = get(0, 0, 400, 400);
+			    //} mask
+			    //}//Aspen
+			    
+			    background(0);
+			    if(Pic){
+			        Pic.mask(masking);
+			    }
+			    
+			    //}//draw and mask the logo
+			    Level();
+			    
+			    return({
+			        load:function(){
+			            if(curLoad < Object.keys(imgs).length){
+			                background(255,0);
+			                var img = imgs[Object.keys(imgs)[curLoad]];
+			                img.d();
+			                imgs[Object.keys(imgs)[curLoad]] = get(0,0,img.w,img.h);    
+			                background(0,0,0,0);
+			                curLoad++;
+			            }
+			            else{
+			                curLoad ++;   
+			            }
+			            pushMatrix();
+			            scale(1.5);
+			            background(0);
+			            image(Pic,50,70);
+			            textFont(fonts[1],25);
+			            fill(0, 247, 255);
+			            text('AspenBranch',200,125);
+			            text('Presents',200,275);
+			            popMatrix();
+			            if(curLoad > 100 && !Trans.running){
+			                Trans.start('menu');   
+			            }
+			            fill(20);
+			            rect(90,500,420,50,5);
+			            fill(0,200,255);
+			            rect(100,510,min(curLoad*4,400),30);
+			        },
+			        play:function(){
+			            Camera.startLink();
+			            Camera.follow(Player);
+			            Camera.setScale(Player.scale);
+			            
+			            for(var i = -height; i < height*2; i += 600){
+			                for(var j = -width; j < width*5; j += 600){
+			                    image(imgs.backdrop,j,i);   
+			                }
+			            }
+			            
+			            for(var i = 0; i < blocks.length; i ++){
+			                blocks[i].display();   
+			                blocks[i].collide();
+			            }
+			        
+			            Player.display();
+			            Player.move();
+			            Camera.endLink();
+			            
+			        },
+			        menu:function(){
+			            image(imgs.backdrop,0,0);    
+			            image(imgs.title,Trans.x,100);
+			            
+			            fill(210);
+			            textFont(fonts[1],20);
+			            text('AspenBranch  June 2024',300+Trans.x,250); 
+			            
+			            rect(25+Trans.x,247,150,5);
+			            rect(425+Trans.x,247,150,5);
+			            
+			            Buttons.play.run();
+			            Buttons.how.run();
+			            Buttons.credit.run();
+			        },
+			        how:function(){
+			            image(imgs.backdrop,0,0); 
+			            image(imgs.how,Trans.x,100);
+			            
+			            fill(245,245,255);
+			            textFont(fonts[0],20);
+			            text('Use the arrows or wasd keys to move.',350-Trans.x,300);
+			            text('Avoid dangerous lava to stay alive.',250+Trans.x,400);
+			            
+			            text('Get to the portal to advance forward.',350-Trans.x,500);
+			            pushMatrix();
+			            translate(100-Trans.x,275);
+			            translate(25,25);
+			            rotate(cos(frameCount*2)*20);
+			            translate(-25,-25);
+			            image(imgs.player,0,0);
+			            popMatrix();
+			            
+			            pushMatrix();
+			            translate(450+Trans.x,375);
+			            translate(25,25);
+			            rotate(sin(frameCount*2)*20);
+			            translate(-25,-25);
+			            image(imgs.lava,0,0);
+			            popMatrix();
+			            
+			            pushMatrix();
+			            translate(100-Trans.x,475);
+			            translate(25,25);
+			            rotate(cos(frameCount*2+180)*20);
+			            translate(-25,-25);
+			            colorMode(HSB);
+			            fill(frameCount%255,255,255);
+			            rect(0,0,50,50);
+			            colorMode(RGB);
+			            image(imgs.portal,0,0);
+			            popMatrix();
+			            
+			            Buttons.home.run();
+			        },
+			        credit:function(){
+			            image(imgs.backdrop,0,0);    
+			            image(imgs.credit,Trans.x,100);
+			            
+			            fill(245,245,255);
+			            textFont(fonts[0],25);
+			            text('All credit to AspenBranch with some help by chatgpt',50-Trans.x,200,500,300);
+			            
+			            Buttons.home.run();
+			        },
+			        win:function(){
+			            image(imgs.backdrop,0,0);    
+			            image(imgs.win,Trans.x,100);
+			            
+			            fill(245,245,255);
+			            textFont(fonts[0],25);
+			            text('You win!',50-Trans.x,200,500,300);
+			            
+			            Buttons.home.run();
+			        },
+			    }); 
+			})();
+			
+			draw = function() {
+			    
+			    Mouse.set('arrow');
+			    Scene[scene]();
+			    Mouse.display();
+			    Mouse.update();
+			    Trans.run();
+			    click = false;
+			};
+			
+			
+			
+		}
+		
+		runPJS(program);
+		
+		// Add reload button on KA --> <script>
+		
+	</script>
+</body>
+
+</html>
